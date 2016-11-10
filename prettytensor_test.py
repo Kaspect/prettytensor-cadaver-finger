@@ -18,7 +18,7 @@ random.seed(1234)
 
 data = []
 
-iterations = 2
+iterations = 100
 batch_size = 200
 plot_period = 1
 training_range_lower_bound = 10000
@@ -30,12 +30,27 @@ step_size = 0.1
 muscle_activation = []
 f_out = []
 
+def print_update_message_to_console(value_label, value, iteration_label, iteration):
+    print('%s=%d\t%s=%f' % (iteration_label, iteration, value_label, value))
+
+def append_float_to_existing_file(file_writer, float_value):
+    file_writer.write(str(float_value))
+    file_writer.write('\n')
+
+def plot_mse_convergence(file_name):
+    f = open(file_name, 'r')
+    mse_for_each_successive_iteration = []
+    for line in f:
+        mse_for_each_successive_iteration.append(line)
+
+    plt.plot(mse_for_each_successive_iteration)
+    plt.ylabel('Mean Squared Error (f_prediction - f_experimental)^2')
+    plt.xlabel('Iteration')
+    plt.show()
+
 def histogram_of_force_absolute_diff(list_of_unidimensional_floats, breaks):
     #bins = np.arange(-100, 100, 5) # fixed bin size
-    #ipdb.set_trace()
     bins = np.linspace(min(list_of_unidimensional_floats), max(list_of_unidimensional_floats), breaks)
-
-    #plt.xlim([min(list_of_unidimensional_floats)-0.001, max(list_of_unidimensional_floats)+0.001])
 
     plt.hist(list_of_unidimensional_floats, bins=bins, alpha=0.5)
     plt.title('Distribution of Squared Errors of Fx (fixed bin size)')
@@ -136,13 +151,8 @@ def trainData():
             if i%plot_period==0:
                 validation_mse = sess.run([loss],
                                         {x: validation_x, y: validation_y})
-
-
-
-                f.write(str(validation_mse[0]))
-                f.write("\n")
-                print  '%d: Validation MSE:' % i
-                print validation_mse[0]
+                append_float_to_existing_file(f, validation_mse[0])
+                print_update_message_to_console('MSE', validation_mse[0], 'Iteration', i)
 
             # intput: i, validation_x, validation_y
             # output: sess.run([loss], {x: [validation_x[input]], y: [validation_y[input]]})
@@ -161,20 +171,15 @@ def trainData():
 
             '''
     histogram_of_force_absolute_diff([x[0] for x in error_heat_map[0]], 10)
-
+    f.close()
 
 
 
 
 pullData()
 trainData()
-'''
-f = open('pt_14k.txt', 'r')
-data2 = []
-for line in f:
-    data2.append(line)
 
-plt.plot(data2)
-plt.ylabel('MSE')
-plt.show()
+plot_mse_convergence(file_name='pt_14k.txt')
+'''
+
 '''

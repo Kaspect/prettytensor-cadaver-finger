@@ -12,7 +12,7 @@ random.seed(1234)
 
 data = []
 
-iterations = 1500
+iterations = 100
 batch_size = 200
 plot_period = 1
 training_range_lower_bound = 10000
@@ -62,8 +62,8 @@ def trainData():
 
     loss = (pt.wrap(x)
               .flatten()
-              .fully_connected(20, activation_fn=tf.nn.tanh, init=init_normal)
-              .fully_connected(20, activation_fn=tf.nn.tanh, init=init_normal)
+              .fully_connected(20, name='layer1', activation_fn=tf.nn.tanh, init=init_normal)
+              .fully_connected(20, name='layer2', activation_fn=tf.nn.tanh, init=init_normal)
               #.fully_connected(20, activation_fn=tf.nn.tanh, init=init_normal)
               .fully_connected(num_outputs, activation_fn=tf.nn.tanh, init=init_normal)
               .l2_regression(y))
@@ -112,6 +112,8 @@ def trainData():
                 f.write(str(validation_mse[0]))
                 f.write("\n")
                 print  '%d: Validation MSE: %g' % (i, validation_mse[0])
+
+            print sess.run(tf.get_variable('layer1'))
 
 '''
             print "ERROR: "

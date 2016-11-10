@@ -6,6 +6,10 @@ import random
 import os
 import matplotlib.pyplot as plt
 
+import multiprocessing as multi
+from multiprocessing import Manager
+
+
 tf.set_random_seed(1234)
 np.random.seed(1234)
 random.seed(1234)
@@ -81,6 +85,7 @@ def trainData():
 
     validation_x = muscle_activation[training_range_lower_bound:]
     validation_y = f_out[training_range_lower_bound:]
+    validations = zip(validation_x, validation_y)
 
     if os.path.isfile('pt_14k.txt'):
         os.remove('pt_14k.txt')
@@ -115,10 +120,14 @@ def trainData():
                 print  '%d: Validation MSE:' % i
                 print validation_mse[0]
 
-            f_x_output = []
-            f_x_output = validation_x.map(item => sess.run([loss], {x: [item], y: [validation_y[i]]}) )
-            for i in xrange(len(validation_x)):
-                f_x_output.append(sess.run([loss], {x: [validation_x[i]], y: [validation_y[i]]}))
+            #p = multi.Pool(processes=4)
+            f_x_output = map(lambda input : sess.run([loss], {x: [input[0]], y: [input[1]]}) , validations)
+
+            # intput: i, validation_x, validation_y
+            # output: sess.run([loss], {x: [validation_x[input]], y: [validation_y[input]]})
+
+            #for i in xrange(len(validation_x)):
+              #f_x_output.append(sess.run([loss], {x: [validation_x[i]], y: [validation_y[i]]}))
 
 
 

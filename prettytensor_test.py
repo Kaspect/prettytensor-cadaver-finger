@@ -62,10 +62,10 @@ def trainData():
 
     loss = (pt.wrap(x)
               .flatten()
-              .fully_connected(20, name='layer1', activation_fn=tf.nn.tanh, init=init_normal)
-              .fully_connected(20, name='layer2', activation_fn=tf.nn.tanh, init=init_normal)
+              .fully_connected(20, activation_fn=tf.nn.tanh, init=init_normal, name='layer1')
+              .fully_connected(20,  activation_fn=tf.nn.tanh, init=init_normal, name='layer2')
               #.fully_connected(20, activation_fn=tf.nn.tanh, init=init_normal)
-              .fully_connected(num_outputs, activation_fn=tf.nn.tanh, init=init_normal)
+              .fully_connected(num_outputs, activation_fn=tf.nn.tanh, init=init_normal, name='output_layer')
               .l2_regression(y))
 
     optimizer = tf.train.GradientDescentOptimizer(step_size)  # learning rate
@@ -82,7 +82,8 @@ def trainData():
     validation_x = muscle_activation[training_range_lower_bound:]
     validation_y = f_out[training_range_lower_bound:]
 
-    os.remove('pt_14k.txt')
+    if os.path.isfile('pt_14k.txt'):
+        os.remove('pt_14k.txt')
     f = open('pt_14k.txt', 'w')
 
     i = 0
@@ -111,71 +112,31 @@ def trainData():
 
                 f.write(str(validation_mse[0]))
                 f.write("\n")
-                print  '%d: Validation MSE: %g' % (i, validation_mse[0])
+                print  '%d: Validation MSE:' % i
+                print validation_mse[0]
 
-            print sess.run(tf.get_variable('layer1'))
+            f_x_output = []
+            for i in xrange(len(validation_x)):
+                f_x_output.append(sess.run([loss], {x: [validation_x[i]], y: [validation_y[i]]}))
 
-'''
-            print "ERROR: "
-
-            mean_square_sum_error = 0
-            average_percentage_error = 0
-
-            for i in range(training_range_lower_bound, training_range_upper_bound):
-                expected_value = float(data[i][18])
-                predicted_value = 0
-                predicted_muscle_activations = []
-                for j in range(15):
-                    if j%2==0 and j!=0:
-                        predicted_muscle_activations.append(float(data[i][j]))
-
-                predicted_muscle_activations = [predicted_muscle_activations]
-
-                #feed_dict = {x: predicted_muscle_activations}
-                #sess.run([loss], y, feed_dict)
-'''
+            print f_x_output
 
 
 
-'''
-    y = tf.matmul(x,W) + b
-
-    y_ = tf.placeholder(tf.float32, shape=(None,num_outputs))
-
-    cost = tf.reduce_sum(tf.square(y-y_))
-    #cost = -tf.reduce_sum(y_*tf.log(y) + (1-y_) * tf.log(1-y))
-    #cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(y, y_))
 
 
+            '''
+            # Used to return weights for each layer
+            with tf.variable_scope('layer1', reuse=True):
+                print sess.run(tf.get_variable('weights'))
+            with tf.variable_scope('layer2', reuse=True):
+                print sess.run(tf.get_variable('weights'))
+            with tf.variable_scope('output_layer', reuse=True):
+                print sess.run(tf.get_variable('weights'))
 
-    train_step = tf.train.GradientDescentOptimizer(step_size).minimize(cost)
-    init = tf.initialize_all_variables()
+            '''
 
-    sess = tf.Session()
-    sess.run(init)
-
-    for i in range(iterations): #iterations
-        muscle_activation_batch = []
-        f_out_batch = []
-        for k in range(batch_size):
-            temprand = random.randint(1,training_range_lower_bound)
-            muscle_activation_batch.append(muscle_activation[temprand])
-            f_out_batch.append(f_out[temprand])
-
-        feed = {x: muscle_activation_batch, y_: f_out_batch}
-        sess.run(train_step, feed_dict=feed)
-
-        print ("After %d iteration:" %i)
-        print "W:"
-        print sess.run(W)
-        print "b"
-        print sess.run(b)
-
-
-    W_arr = sess.run(W)
-    bias = sess.run(b)[0]
-'''
-
+            #print sess.run([loss], {x: [[0.5,0.5,0.5,0.5,0.5,0.5,0.5]], y: [[4]]})
 
 
 #validation set

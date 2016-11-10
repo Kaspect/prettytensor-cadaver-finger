@@ -116,8 +116,11 @@ def trainData():
                 print validation_mse[0]
 
             f_x_output = []
+            f_x_output = validation_x.map(item => sess.run([loss], {x: [item], y: [validation_y[i]]}) )
             for i in xrange(len(validation_x)):
                 f_x_output.append(sess.run([loss], {x: [validation_x[i]], y: [validation_y[i]]}))
+
+
 
             print f_x_output
 

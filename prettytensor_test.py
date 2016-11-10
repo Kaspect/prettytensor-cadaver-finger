@@ -5,9 +5,11 @@ import numpy as np
 import random
 import os
 import matplotlib.pyplot as plt
+import ipdb
 
 import multiprocessing as multi
-from multiprocessing import Manager
+from functools import partial
+#from multiprocessing import Manager
 
 
 tf.set_random_seed(1234)
@@ -16,7 +18,7 @@ random.seed(1234)
 
 data = []
 
-iterations = 100
+iterations = 2
 batch_size = 200
 plot_period = 1
 training_range_lower_bound = 10000
@@ -27,6 +29,25 @@ step_size = 0.1
 
 muscle_activation = []
 f_out = []
+
+def histogram_of_force_absolute_diff(list_of_unidimensional_floats, breaks):
+    #bins = np.arange(-100, 100, 5) # fixed bin size
+    #ipdb.set_trace()
+    bins = np.linspace(min(list_of_unidimensional_floats), max(list_of_unidimensional_floats), breaks)
+
+    #plt.xlim([min(list_of_unidimensional_floats)-0.001, max(list_of_unidimensional_floats)+0.001])
+
+    plt.hist(list_of_unidimensional_floats, bins=bins, alpha=0.5)
+    plt.title('Distribution of Squared Errors of Fx (fixed bin size)')
+    plt.xlabel(str('variable |f_prediction - f_experimental|^2 (bin size = %f)' % ((0.005-0)/breaks)))
+    plt.ylabel('Validation Set Observations (count)')
+
+    plt.show()
+
+def compute_list_of_mse_values_per_iteration_per_datapoint_helper(sess):
+    def compute_list_of_mse_values_per_iteration_per_datapoint(input):
+        return (sess.run([loss], {x: [input[0]], y: [input[1]]}))
+    return compute_list_of_mse_values_per_iteration_per_datapoint
 
 def pullData():
     global data
@@ -92,6 +113,9 @@ def trainData():
     f = open('pt_14k.txt', 'w')
 
     i = 0
+
+    error_heat_map = []
+
     with tf.Session() as sess:
         sess.run(init_op)
         for i in range(iterations):
@@ -120,21 +144,10 @@ def trainData():
                 print  '%d: Validation MSE:' % i
                 print validation_mse[0]
 
-            #p = multi.Pool(processes=4)
-            f_x_output = map(lambda input : sess.run([loss], {x: [input[0]], y: [input[1]]}) , validations)
-
             # intput: i, validation_x, validation_y
             # output: sess.run([loss], {x: [validation_x[input]], y: [validation_y[input]]})
-
-            #for i in xrange(len(validation_x)):
-              #f_x_output.append(sess.run([loss], {x: [validation_x[i]], y: [validation_y[i]]}))
-
-
-
-            print f_x_output
-
-
-
+            f_x_output = map(lambda input : sess.run([loss], {x: [input[0]], y: [input[1]]}) , validations)
+            error_heat_map.append(f_x_output)
 
 
             '''
@@ -147,45 +160,15 @@ def trainData():
                 print sess.run(tf.get_variable('weights'))
 
             '''
+    histogram_of_force_absolute_diff([x[0] for x in error_heat_map[0]], 10)
 
-            #print sess.run([loss], {x: [[0.5,0.5,0.5,0.5,0.5,0.5,0.5]], y: [[4]]})
 
 
-#validation set
-def getError():
-    print "ERROR: "
 
-    mean_square_sum_error = 0
-    average_percentage_error = 0
-
-    for i in range(training_range_lower_bound, training_range_upper_bound):
-        expected_value = float(data[i][18])
-        predicted_value = 0
-        predicted_muscle_activations = []
-        for j in range(15):
-            if j%2==0 and j!=0:
-                predicted_muscle_activations.append(float(data[i][j]))
-
-        for j,k in enumerate(W_arr):
-            predicted_value += predicted_muscle_activations[j]*k
-
-        predicted_value+=bias
-        average_percentage_error += abs(predicted_value-expected_value)/expected_value
-        mean_square_sum_error += (predicted_value-expected_value)**2
-        print "predicted: " , predicted_value , " actual: " , expected_value
-
-    mean_square_sum_error/=(training_range_upper_bound-training_range_lower_bound+1)
-    average_percentage_error/=(training_range_upper_bound-training_range_lower_bound+1)
-
-    print "Mean Square Sum Error: "
-    print mean_square_sum_error
-
-    print "Average Error: "
-    print average_percentage_error
 
 pullData()
 trainData()
-#getError()
+'''
 f = open('pt_14k.txt', 'r')
 data2 = []
 for line in f:
@@ -194,3 +177,4 @@ for line in f:
 plt.plot(data2)
 plt.ylabel('MSE')
 plt.show()
+'''

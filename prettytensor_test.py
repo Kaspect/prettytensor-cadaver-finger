@@ -170,7 +170,6 @@ def trainData():
                 print sess.run(tf.get_variable('weights'))
 
             '''
-    histogram_of_force_absolute_diff([x[0] for x in error_heat_map[0]], 10)
     f.close()
 
 

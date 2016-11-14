@@ -12,7 +12,7 @@ random.seed(1234)
 
 data = []
 
-iterations = 100
+iterations = 1
 batch_size = 200
 plot_period = 1
 training_range_lower_bound = 10000
@@ -116,7 +116,7 @@ def trainData():
                 print(validation_mse[0])
 
             f_x_output = []
-            for i in xrange(len(validation_x)):
+            for i in range(len(validation_x)):
                 f_x_output.append(sess.run([loss], {x: [validation_x[i]], y: [validation_y[i]]}))
 
 
@@ -174,6 +174,9 @@ data2 = []
 for line in f:
     data2.append(line)
 
-plt.plot(data2)
-plt.ylabel('MSE')
-plt.show()
+# check if there is a display
+# if so, print the plot
+if 'DISPLAY' in os.environ:
+    plt.plot(data2)
+    plt.ylabel('MSE')
+    plt.show()

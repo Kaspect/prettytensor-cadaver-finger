@@ -12,7 +12,7 @@ random.seed(1234)
 
 data = []
 
-iterations = 100
+iterations = 1
 batch_size = 200
 plot_period = 1
 training_range_lower_bound = 10000
@@ -102,7 +102,7 @@ def trainData():
             mse = sess.run([train_op, loss],
                                      {x: muscle_activation_batch, y: f_out_batch})
 
-            #print 'Loss: %g' % mse[1]
+            #print('Loss: %g' % mse[1])
 
             if i%plot_period==0:
                 validation_mse = sess.run([loss],
@@ -112,39 +112,31 @@ def trainData():
 
                 f.write(str(validation_mse[0]))
                 f.write("\n")
-                print  '%d: Validation MSE:' % i
-                print validation_mse[0]
+                print( '%d: Validation MSE:' % i)
+                print(validation_mse[0])
 
             f_x_output = []
-            f_x_output = validation_x.map(item => sess.run([loss], {x: [item], y: [validation_y[i]]}) )
-            for i in xrange(len(validation_x)):
+            for i in range(len(validation_x)):
                 f_x_output.append(sess.run([loss], {x: [validation_x[i]], y: [validation_y[i]]}))
-
-
-
-            print f_x_output
-
-
-
 
 
             '''
             # Used to return weights for each layer
             with tf.variable_scope('layer1', reuse=True):
-                print sess.run(tf.get_variable('weights'))
+                print(sess.run(tf.get_variable('weights')))
             with tf.variable_scope('layer2', reuse=True):
-                print sess.run(tf.get_variable('weights'))
+                print(sess.run(tf.get_variable('weights')))
             with tf.variable_scope('output_layer', reuse=True):
-                print sess.run(tf.get_variable('weights'))
+                print(sess.run(tf.get_variable('weights')))
 
             '''
 
-            #print sess.run([loss], {x: [[0.5,0.5,0.5,0.5,0.5,0.5,0.5]], y: [[4]]})
+            #print(sess.run([loss], {x: [[0.5,0.5,0.5,0.5,0.5,0.5,0.5]], y: [[4]]}))
 
 
 #validation set
 def getError():
-    print "ERROR: "
+    print("ERROR: ")
 
     mean_square_sum_error = 0
     average_percentage_error = 0
@@ -163,16 +155,16 @@ def getError():
         predicted_value+=bias
         average_percentage_error += abs(predicted_value-expected_value)/expected_value
         mean_square_sum_error += (predicted_value-expected_value)**2
-        print "predicted: " , predicted_value , " actual: " , expected_value
+        print("predicted: " , predicted_value , " actual: " , expected_value)
 
     mean_square_sum_error/=(training_range_upper_bound-training_range_lower_bound+1)
     average_percentage_error/=(training_range_upper_bound-training_range_lower_bound+1)
 
-    print "Mean Square Sum Error: "
-    print mean_square_sum_error
+    print("Mean Square Sum Error: ")
+    print(mean_square_sum_error)
 
-    print "Average Error: "
-    print average_percentage_error
+    print("Average Error: ")
+    print(average_percentage_error)
 
 pullData()
 trainData()
@@ -182,6 +174,9 @@ data2 = []
 for line in f:
     data2.append(line)
 
-plt.plot(data2)
-plt.ylabel('MSE')
-plt.show()
+# check if there is a display
+# if so, print the plot
+if 'DISPLAY' in os.environ:
+    plt.plot(data2)
+    plt.ylabel('MSE')
+    plt.show()

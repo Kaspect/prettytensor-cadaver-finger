@@ -83,11 +83,11 @@ def trainData():
         sess.run(train_step, feed_dict=feed)
 
         if i%100==0:
-            print ("After %d iteration:" %i)
-            print "W:"
-            print sess.run(W)
-            print "b"
-            print sess.run(b)
+            print("After %d iteration:" %i)
+            print("W:")
+            print(sess.run(W))
+            print("b")
+            print(sess.run(b))
 
         W_arr = sess.run(W)
         bias = sess.run(b)[0]
@@ -101,7 +101,7 @@ def trainData():
 
 #validation set
 def getError():
-    print "ERROR: "
+    print("ERROR: ")
 
     mean_square_sum_error = 0
     average_percentage_error = 0
@@ -126,8 +126,8 @@ def getError():
     average_percentage_error/=(training_range_upper_bound-training_range_lower_bound+1)
     #mean_square_sum_error = mean_square_sum_error/(training_range_upper_bound-training_range_lower_bound+1)
 
-    print "Sum of Square Error: "
-    print mean_square_sum_error
+    print("Sum of Square Error: ")
+    print(mean_square_sum_error)
     return mean_square_sum_error
 
     #print "Average Error: "

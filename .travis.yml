@@ -1,0 +1,25 @@
+#created by Brian Cohn on Nov 10
+# code below is taken from https://github.com/fchollet/keras/blob/master/.travis.yml
+sudo: required
+dist: trusty
+language: python
+python: # Only two versions for now
+  - "2.7"
+  - "3.4"
+# command to install dependencies
+install:
+  - pip install numpy
+  - pip install matplotlib
+  # install TensorFlow from https://storage.googleapis.com/tensorflow/
+  - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
+      pip install https://storage.googleapis.com/tensorflow/linux/cpu/tensorflow-0.9.0-cp27-none-linux_x86_64.whl;
+    elif [[ "$TRAVIS_PYTHON_VERSION" == "3.4" ]]; then
+      pip install https://storage.googleapis.com/tensorflow/linux/cpu/tensorflow-0.9.0-cp34-cp34m-linux_x86_64.whl;
+    fi
+  - pip install prettytensor
+script:
+  - sed -i -- 's/iterations = 5000/iterations = 5/g' linear_regression_14k.py # change iterations to 1 for quick testing
+  - python linear_regression_14k.py # run this first to download MNIST file
+  - sed -i -- 's/iterations = 1500/iterations = 5/g' prettytensor_test.py # change iterations to 1 for quick testing
+  - python prettytensor_test.py # run prettytensor_test to confirm it's working as intended
+  - echo DONE DONE DONE!

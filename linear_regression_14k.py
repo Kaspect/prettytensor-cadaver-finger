@@ -68,7 +68,8 @@ def trainData():
     sess = tf.Session()
     sess.run(init)
 
-    os.remove('linear_14k.txt')
+    if os.path.isfile('linear_14k.txt'):
+        os.remove('linear_14k.txt')
     f = open('linear_14k.txt', 'w')
     for i in range(iterations): #iterations
         muscle_activation_batch = []

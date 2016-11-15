@@ -160,7 +160,7 @@ def getError():
     mean_square_sum_error/=(training_range_upper_bound-training_range_lower_bound+1)
     average_percentage_error/=(training_range_upper_bound-training_range_lower_bound+1)
 
-    print("Mean Square Sum Error: ")
+    print("Mean Square Sum Error: ")Err
     print(mean_square_sum_error)
 
     print("Average Error: ")
@@ -180,3 +180,5 @@ if 'DISPLAY' in os.environ:
     plt.plot(data2)
     plt.ylabel('MSE')
     plt.show()
+
+getError()

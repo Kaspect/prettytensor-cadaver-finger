@@ -166,6 +166,8 @@ def trainData():
             # output: sess.run([loss], {x: [validation_x[input]], y: [validation_y[input]]})
             f_x_output = map(lambda input : sess.run([loss], {x: [input[0]], y: [input[1]]}) , validations)
             error_heat_map.append(f_x_output)
+            # f_x_output is an array of errors for each data point in the validation set
+            # looks like => [[err1], [err2] ... ]
 
 
             '''
@@ -179,23 +181,19 @@ def trainData():
 
             '''
     f.close()
-#    plt.plot(error_heat_map)
-#    plt.show()
-    #plt.bar3(error_heat_map)
-    #points, sub = hist3d_scatter([i in xrange(len(error_heat_map))], error_heat_map, bins=5)
-    hist_graph = []
-    #f, hist_graph = plt.subplots(iterations)
 
+    hist_graph = []
     iter_array = xrange(iterations)
 
-
+    # find max error across all iterations
     max_error = 0
     for i in xrange(iterations):
         if max([x[0] for x in error_heat_map[i]]) > max_error:
             max_error = max([x[0] for x in error_heat_map[i]])
 
+    # create histogram for each iteration and add it to hist_graph
     for i in xrange(iterations):
-        hist_graph.append(histogram_of_force_absolute_diff([x[0] for x in error_heat_map[i]], max_error, 10))
+        hist_graph.append(histogram_of_force_absolute_diff([x[0] for x in error_heat_map[i]], max_error, 5))
 
 
 
@@ -207,16 +205,8 @@ def trainData():
         # hist_graph[iteration][0] = bin counts for each iteration
         # hist_grpah[iteration][1] = bin ranges
 
-    #fig = plt.figure()
-    #ax = fig.add_subplot(111, projection='3d')
-    #dx = np.ones(len(heatmap_data))
-    #dy = np.ones(len(heatmap_data))
-    #dz = xrange(1000)
     fig = plt.figure()
     ax = fig.add_subplot(111)
-    print "********"
-    print heatmap_data
-
 
     Xs = [x[0] for x in heatmap_data]
     Ys = [x[1] for x in heatmap_data]
@@ -237,28 +227,10 @@ def trainData():
     vmax=abs(zi).max(), vmin=-abs(zi).max())
     plt.colorbar()  # draw colorbar
 
-
-
-
-    #colors = ['r','g','b', 'y']
-    #colors = colors*len(Xs)
-
-    #ax.bar(Xs, Zs, zs= Ys, zdir='y', color=colors, alpha = 0.8 )
-    #ax.bar3d([x[0] for x in heatmap_data], [x[1] for x in heatmap_data], [x[2] for x in heatmap_data], dx, dy, dz, color='#00ceaa')
     plt.show()
-
-    #plt.show()
-
-
-
-
-
 
 
 pullData()
 trainData()
 
 #plot_mse_convergence(file_name='pt_14k.txt')
-'''
-
-'''

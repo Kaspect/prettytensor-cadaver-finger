@@ -1,11 +1,15 @@
+from matplotlib.mlab import griddata
 import csv
 import prettytensor as pt
 import tensorflow as tf
 import numpy as np
 import random
+import pdb
 import os
+import matplotlib
 import matplotlib.pyplot as plt
 import ipdb
+from mpl_toolkits.mplot3d import Axes3D
 
 import multiprocessing as multi
 from functools import partial
@@ -18,7 +22,7 @@ random.seed(1234)
 
 data = []
 
-iterations = 100
+iterations = 5
 batch_size = 200
 plot_period = 1
 training_range_lower_bound = 10000
@@ -46,18 +50,22 @@ def plot_mse_convergence(file_name):
     plt.plot(mse_for_each_successive_iteration)
     plt.ylabel('Mean Squared Error (f_prediction - f_experimental)^2')
     plt.xlabel('Iteration')
-    plt.show()
+    #plt.show()
 
-def histogram_of_force_absolute_diff(list_of_unidimensional_floats, breaks):
+
+def histogram_of_force_absolute_diff(list_of_unidimensional_floats, max_error, breaks):
     #bins = np.arange(-100, 100, 5) # fixed bin size
-    bins = np.linspace(min(list_of_unidimensional_floats), max(list_of_unidimensional_floats), breaks)
+    bins = np.linspace(0, max_error, breaks)
 
-    plt.hist(list_of_unidimensional_floats, bins=bins, alpha=0.5)
+    myHist = plt.hist(list_of_unidimensional_floats, bins=bins, alpha=0.5)
     plt.title('Distribution of Squared Errors of Fx (fixed bin size)')
     plt.xlabel(str('variable |f_prediction - f_experimental|^2 (bin size = %f)' % ((0.005-0)/breaks)))
     plt.ylabel('Validation Set Observations (count)')
+    return myHist
 
-    plt.show()
+    #plt.show()
+
+
 
 def compute_list_of_mse_values_per_iteration_per_datapoint_helper(sess):
     def compute_list_of_mse_values_per_iteration_per_datapoint(input):
@@ -171,6 +179,78 @@ def trainData():
 
             '''
     f.close()
+#    plt.plot(error_heat_map)
+#    plt.show()
+    #plt.bar3(error_heat_map)
+    #points, sub = hist3d_scatter([i in xrange(len(error_heat_map))], error_heat_map, bins=5)
+    hist_graph = []
+    #f, hist_graph = plt.subplots(iterations)
+
+    iter_array = xrange(iterations)
+
+
+    max_error = 0
+    for i in xrange(iterations):
+        if max([x[0] for x in error_heat_map[i]]) > max_error:
+            max_error = max([x[0] for x in error_heat_map[i]])
+
+    for i in xrange(iterations):
+        hist_graph.append(histogram_of_force_absolute_diff([x[0] for x in error_heat_map[i]], max_error, 10))
+
+
+
+    heatmap_data = []
+
+    for i in xrange(iterations):
+        for j,k in enumerate(hist_graph[i][0]):
+            heatmap_data.append([i, hist_graph[i][1][j], hist_graph[i][0][j]])
+        # hist_graph[iteration][0] = bin counts for each iteration
+        # hist_grpah[iteration][1] = bin ranges
+
+    #fig = plt.figure()
+    #ax = fig.add_subplot(111, projection='3d')
+    #dx = np.ones(len(heatmap_data))
+    #dy = np.ones(len(heatmap_data))
+    #dz = xrange(1000)
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    print "********"
+    print heatmap_data
+
+
+    Xs = [x[0] for x in heatmap_data]
+    Ys = [x[1] for x in heatmap_data]
+    Zs = [x[2] for x in heatmap_data]
+
+
+    minx = min(Xs)
+    maxx = max(Xs)
+    miny = min(Ys)
+    maxy = max(Ys)
+    meanValue = np.mean(Zs)
+
+    xi = np.linspace(minx, maxx, 100)
+    yi = np.linspace(miny, maxy, 100)
+    zi = griddata(Xs, Ys, Zs, xi, yi, interp='linear')
+
+    CS = plt.contourf(xi, yi, zi, 15, cmap=plt.cm.rainbow,
+    vmax=abs(zi).max(), vmin=-abs(zi).max())
+    plt.colorbar()  # draw colorbar
+
+
+
+
+    #colors = ['r','g','b', 'y']
+    #colors = colors*len(Xs)
+
+    #ax.bar(Xs, Zs, zs= Ys, zdir='y', color=colors, alpha = 0.8 )
+    #ax.bar3d([x[0] for x in heatmap_data], [x[1] for x in heatmap_data], [x[2] for x in heatmap_data], dx, dy, dz, color='#00ceaa')
+    plt.show()
+
+    #plt.show()
+
+
+
 
 
 
@@ -178,7 +258,7 @@ def trainData():
 pullData()
 trainData()
 
-plot_mse_convergence(file_name='pt_14k.txt')
+#plot_mse_convergence(file_name='pt_14k.txt')
 '''
 
 '''
